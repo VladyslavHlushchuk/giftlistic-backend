@@ -1,39 +1,87 @@
-# My Cart Backend
+# GiftListic Backend
 
-## Conteúdo
+---
 
-- [Requisitos](#requirements)
-- [Variáveis de Ambiente](#environment)
 
-## Requisitos <a name="requirements"></a>
+### Contents
 
-| Nome   | Instalação                                 |
-| ------ | ------------------------------------------ |
-| Docker | [Instalar](https://www.docker.com/)        |
-| Node   | [Instalar](https://nodejs.org/en/download) |
+- [Requirements](#requirements)
+- [Environment Variables](#environment-variables)
+- [Scripts](#scripts)
 
-## Variáveis de Ambiente <a name="environment"></a>
+### Requirements <a name="requirements"></a>
 
-Você vai precisar criar um arquivo `.env` na raiz do projeto utilizando o `.env.example` como base
+| Name   | Installation                              |
+| ------ | ----------------------------------------- |
+| Docker | [Install](https://www.docker.com/)        |
+| Node   | [Install](https://nodejs.org/en/download) |
 
-## Scripts <a name="scripts"></a>
+### Environment Variables <a name="environment-variables"></a>
 
-Para conseguir instalar as dependências necessário no projeto é necessário rodar o
+You will need to create a `.env` file in the root directory of the project using `.env.example` as a base.
 
-```bash
-  npm i
-```
+### Scripts <a name="scripts"></a>
 
-ou
+To install all project dependencies, run:
 
 ```bash
-  yarn
+npm install
 ```
 
-Para executar o projeto existe alguns outros scripts que estão listados aqui:
+or
 
-| Script    | Descrição                                                                              |
-| --------- | -------------------------------------------------------------------------------------- |
-| start:dev | Roda a aplicação em modo de desenvolvimento                                            |
-| build     | Monta uma imagem da aplicação simulando o processo que é realizado no ambiente de PROD |
-| start     | Roda a aplicação                                                                       |
+```bash
+yarn
+```
+
+The project includes the following scripts:
+
+| Script    | Description                                               |
+| --------- | --------------------------------------------------------- |
+| start:dev | Runs the application in development mode                |
+| build     | Builds a production image of the application              |
+| start     | Starts the application                                    |
+
+---
+
+
+
+### Зміст
+
+- [Вимоги](#вимоги)
+- [Змінні оточення](#змінні-оточення)
+- [Скрипти](#скрипти)
+
+### Вимоги <a name="вимоги"></a>
+
+| Назва   | Інсталяція                                  |
+| ------- | ------------------------------------------- |
+| Docker  | [Встановити](https://www.docker.com/)       |
+| Node    | [Встановити](https://nodejs.org/en/download)  |
+
+### Змінні оточення <a name="змінні-оточення"></a>
+
+Вам потрібно створити файл `.env` у кореневій папці проєкту, використовуючи `.env.example` як зразок.
+
+### Скрипти <a name="скрипти"></a>
+
+Щоб встановити всі залежності проєкту, запустіть:
+
+```bash
+npm install
+```
+
+або
+
+```bash
+yarn
+```
+
+Проєкт містить наступні скрипти:
+
+| Скрипт    | Опис                                                         |
+| --------- | ------------------------------------------------------------ |
+| start:dev | Запускає застосунок у режимі розробки                         |
+| build     | Збирає продакшн-образ застосунку                             |
+| start     | Запускає застосунок                                           |
+
