@@ -1,0 +1,772 @@
+openapi: 3.0.0
+info:
+  title: Giftlistic API
+  version: "1.0.0"
+  description: API бекенд застосунку Giftlistic, що включає модулі користувачів, автентифікації, подарунків, подій та дашборду.
+servers:
+  - url: http://localhost:4444
+    description: Локальний сервер
+
+paths:
+  # ===== USERS =====
+  /users/{id}:
+    get:
+      summary: Отримання інформації про користувача за ID
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          description: Ідентифікатор користувача
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Користувача знайдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Користувача не знайдено
+    patch:
+      summary: Оновлення даних користувача
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          description: Ідентифікатор користувача
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Дані для оновлення користувача
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+      responses:
+        '200':
+          description: Дані користувача оновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Користувача не знайдено
+
+  # ===== AUTH =====
+  /auth/register:
+    post:
+      summary: Реєстрація нового користувача
+      tags:
+        - Auth
+      requestBody:
+        description: Дані для реєстрації користувача
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Користувача зареєстровано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+
+  /auth/login:
+    post:
+      summary: Вхід користувача
+      tags:
+        - Auth
+      requestBody:
+        description: Дані для авторизації
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успішний вхід
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+
+  /auth/refresh:
+    post:
+      summary: Оновлення JWT токенів
+      tags:
+        - Auth
+      requestBody:
+        description: Дані для оновлення токенів
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Токени оновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+
+  /auth/logout:
+    post:
+      summary: Вихід користувача (видалення refresh токена)
+      tags:
+        - Auth
+      requestBody:
+        description: Ідентифікатор користувача для виходу
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '200':
+          description: Вихід виконано
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /auth/reset-password:
+    post:
+      summary: Скидання пароля
+      tags:
+        - Auth
+      requestBody:
+        description: Дані для скидання пароля
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Пароль успішно скинуто
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /auth/forgot-password:
+    post:
+      summary: Відправка листа для скидання пароля
+      tags:
+        - Auth
+      requestBody:
+        description: Email користувача для скидання пароля
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Лист з посиланням для скидання пароля відправлено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /auth/google:
+    get:
+      summary: Ініціація входу через Google OAuth
+      tags:
+        - Auth
+      responses:
+        '302':
+          description: Редірект на Google для авторизації
+
+  /auth/google/callback:
+    get:
+      summary: Обробка callback від Google OAuth
+      tags:
+        - Auth
+      responses:
+        '302':
+          description: Редірект після авторизації
+
+  /auth/me:
+    get:
+      summary: Отримання профілю поточного користувача
+      tags:
+        - Auth
+      responses:
+        '200':
+          description: Дані профілю користувача
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  # ===== GIFTS (Event Gift) =====
+  /event-gift:
+    post:
+      summary: Створення подарунку для події
+      tags:
+        - Gifts
+      requestBody:
+        description: Дані нового подарунку
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventGiftRequest'
+      responses:
+        '201':
+          description: Подарунок створено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventGift'
+
+  /event-gift/many:
+    post:
+      summary: Масове створення подарунків для події
+      tags:
+        - Gifts
+      requestBody:
+        description: Дані для створення декількох подарунків
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventGiftsRequest'
+      responses:
+        '201':
+          description: Подарунки створено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetEventGiftsResponse'
+
+  /event-gift/{eventId}:
+    get:
+      summary: Отримання всіх подарунків для події
+      tags:
+        - Gifts
+      parameters:
+        - name: eventId
+          in: path
+          description: Ідентифікатор події
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список подарунків
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetEventGiftsResponse'
+
+  /event-gift/{giftId}:
+    parameters:
+      - name: giftId
+        in: path
+        description: Ідентифікатор подарунку
+        required: true
+        schema:
+          type: string
+    delete:
+      summary: Видалення подарунку
+      tags:
+        - Gifts
+      responses:
+        '200':
+          description: Подарунок видалено
+    put:
+      summary: Оновлення подарунку
+      tags:
+        - Gifts
+      requestBody:
+        description: Дані для оновлення подарунку
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventGiftRequest'
+      responses:
+        '200':
+          description: Подарунок оновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventGift'
+
+  /event-gift/select:
+    post:
+      summary: Вибір подарунку користувачем
+      tags:
+        - Gifts
+      requestBody:
+        description: Дані для вибору подарунку
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectGiftRequest'
+      responses:
+        '200':
+          description: Подарунок вибрано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventGift'
+
+  # ===== EVENTS =====
+  /events:
+    post:
+      summary: Створення події
+      tags:
+        - Events
+      requestBody:
+        description: Дані для створення події
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        '201':
+          description: Подія створена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEventResponse'
+    get:
+      summary: Отримання всіх подій
+      tags:
+        - Events
+      responses:
+        '200':
+          description: Список усіх подій
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetEventResponse'
+
+  /events/{event_id}:
+    get:
+      summary: Отримання інформації про подію разом з подарунками
+      tags:
+        - Events
+      parameters:
+        - name: event_id
+          in: path
+          description: Ідентифікатор події
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Інформація про подію з подарунками
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetEventResponse'
+
+  /events/user/{user_id}:
+    get:
+      summary: Отримання всіх подій конкретного користувача
+      tags:
+        - Events
+      parameters:
+        - name: user_id
+          in: path
+          description: Ідентифікатор користувача-організатора
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список подій користувача
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetEventResponse'
+
+  # ===== DASHBOARD =====
+  /dashboard/{user_id}:
+    get:
+      summary: Отримання даних дашборду користувача
+      tags:
+        - Dashboard
+      parameters:
+        - name: user_id
+          in: path
+          description: Ідентифікатор користувача
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Дані дашборду отримано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardResponse'
+
+components:
+  schemas:
+    # ===== Загальні схеми =====
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "123"
+        name:
+          type: string
+          example: "Іван Іванов"
+        email:
+          type: string
+          format: email
+          example: "ivan@example.com"
+      required:
+        - id
+        - name
+        - email
+
+    UpdateUser:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Новий Ім'я"
+        email:
+          type: string
+          format: email
+          example: "new-email@example.com"
+
+    # ===== Auth =====
+    RegisterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Іван Іванов"
+        email:
+          type: string
+          format: email
+          example: "ivan@example.com"
+        password:
+          type: string
+          example: "пароль123"
+        recaptchaToken:
+          type: string
+      required:
+        - name
+        - email
+        - password
+        - recaptchaToken
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "ivan@example.com"
+        password:
+          type: string
+          example: "пароль123"
+        recaptchaToken:
+          type: string
+      required:
+        - email
+        - password
+        - recaptchaToken
+
+    LoginResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "123"
+        name:
+          type: string
+          example: "Іван Іванов"
+        email:
+          type: string
+          format: email
+          example: "ivan@example.com"
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+      required:
+        - id
+        - name
+        - email
+        - access_token
+        - refresh_token
+
+    RefreshRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+        refresh_token:
+          type: string
+      required:
+        - userId
+        - refresh_token
+
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+      required:
+        - access_token
+        - refresh_token
+
+    LogoutRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+      required:
+        - userId
+
+    ResetPasswordRequest:
+      type: object
+      properties:
+        token:
+          type: string
+        newPassword:
+          type: string
+      required:
+        - token
+        - newPassword
+
+    ForgotPasswordRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "ivan@example.com"
+      required:
+        - email
+
+    # ===== Gifts (Event Gift) =====
+    CreateEventGiftRequest:
+      type: object
+      properties:
+        eventId:
+          type: string
+        name:
+          type: string
+          example: "Подарунок"
+        purchaseLink:
+          type: string
+          example: "http://example.com"
+        imageUrl:
+          type: string
+          example: "http://example.com/image.jpg"
+        description:
+          type: string
+          example: "Опис подарунку"
+        price:
+          type: number
+          example: 99.99
+        selected:
+          type: boolean
+          default: false
+      required:
+        - eventId
+        - name
+        - purchaseLink
+        - imageUrl
+        - description
+        - price
+
+    EventGift:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "gift123"
+        eventId:
+          type: string
+        name:
+          type: string
+        purchaseLink:
+          type: string
+        imageUrl:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        selected:
+          type: boolean
+
+    CreateEventGiftsRequest:
+      type: object
+      properties:
+        eventId:
+          type: string
+        gifts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateEventGiftRequest'
+      required:
+        - eventId
+        - gifts
+
+    GetEventGiftsResponse:
+      type: object
+      properties:
+        gifts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventGift'
+
+    SelectGiftRequest:
+      type: object
+      properties:
+        giftId:
+          type: string
+        giftGiverId:
+          type: string
+      required:
+        - giftId
+        - giftGiverId
+
+    # ===== Events =====
+    CreateEventRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "День Народження"
+        date:
+          type: string
+          format: date-time
+          example: "2025-05-01T10:00:00Z"
+        type:
+          type: string
+          example: "Birthday"
+        host_id:
+          type: string
+          example: "123"
+      required:
+        - name
+        - date
+        - type
+        - host_id
+
+    CreateEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        date:
+          type: string
+          format: date-time
+        type:
+          type: string
+        hostId:
+          type: string
+      required:
+        - id
+        - name
+        - date
+        - type
+        - hostId
+
+    GetEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        date:
+          type: string
+          format: date-time
+        type:
+          type: string
+        gifts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventGift'
+      required:
+        - id
+        - name
+        - date
+        - type
+        - gifts
+
+    # ===== Dashboard =====
+    DashboardResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        my_events:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              gifts:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventGift'
+        another_events:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+
+    # ===== Error Response =====
+    BadRequestDTO:
+      type: object
+      properties:
+        message:
+          type: string
+
+    UnauthorizedRequestDTO:
+      type: object
+      properties:
+        message:
+          type: string

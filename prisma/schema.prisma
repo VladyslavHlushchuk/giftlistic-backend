@@ -1,0 +1,108 @@
+// Генератор клієнта Prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Джерело даних: PostgreSQL
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Перелік можливих типів подій
+enum EventType {
+  BABY_SHOWER   // Святкування народження малюка
+  HOUSEWARMING  // Новосілля
+  WEDDING       // Весілля
+  BIRTHDAY      // День народження
+  CHRISTMAS     // Різдвяна вечірка
+  ANOTHER_TYPE    // Інший тип
+}
+
+model User {
+  /// Унікальний ідентифікатор користувача.
+  id        String   @id @default(uuid())
+  /// Ім'я користувача.
+  name      String
+  /// Email користувача.
+  email     String   @unique
+  /// Хешований пароль користувача.
+  password  String
+
+  /// Збережений хешований refresh токен (NULL, якщо користувач неактивний).
+  refreshToken String? 
+
+  /// Дата та час створення запису.
+  createdAt DateTime? @default(now())
+  /// Дата та час видалення запису (для soft delete).
+  deletedAt DateTime?
+
+  /// Події, які створив користувач.
+  events     Event[]
+  /// Подарунки, пов'язані з користувачем (як вибір подарунку).
+  eventGifts EventGift[]
+}
+
+
+/// Модель події
+model Event {
+  /// Унікальний ідентифікатор події.
+  id        String   @id @default(uuid())
+  /// Назва події.
+  name      String
+  /// Тип події.
+  type      EventType
+  /// Дата проведення події.
+  date      DateTime
+
+  /// Організатор події (користувач, який створив подію).
+  host      User     @relation(fields: [hostId], references: [id])
+  /// Ідентифікатор організатора.
+  hostId    String
+
+  /// Дата та час створення запису.
+  createdAt DateTime? @default(now())
+  /// Дата та час видалення запису.
+  deletedAt DateTime?
+
+  /// Подарунки, пов'язані з цією подією.
+  eventGifts EventGift[]
+
+  @@unique([hostId, id], name: "HostEvent")
+}
+
+/// Модель подарунку для події
+model EventGift {
+  /// Унікальний ідентифікатор подарунку.
+  id           String   @id @default(uuid())
+  /// Назва подарунку.
+  name         String
+
+  /// URL для купівлі подарунку.
+  purchaseLink String?
+  /// URL зображення подарунку.
+  imageUrl     String?
+  /// Детальний опис подарунку.
+  description  String?
+  /// Ціна подарунку.
+  price        Float?
+  /// Статус вибору подарунку: чи вибрав хтось цей подарунок (за замовчуванням false).
+  selected     Boolean  @default(false)
+
+  /// Користувач, який вибрав подарунок (якщо застосовується).
+  giftGiver    User?    @relation(fields: [giftGiverId], references: [id])
+  /// Ідентифікатор користувача, який вибрав подарунок.
+  giftGiverId  String?
+
+  /// Подія, до якої належить подарунок.
+  event        Event    @relation(fields: [eventId], references: [id])
+  /// Ідентифікатор події.
+  eventId      String
+
+  /// Дата створення запису.
+  createdAt    DateTime? @default(now())
+  /// Дата видалення запису (для soft delete).
+  deletedAt    DateTime?
+
+  @@unique([eventId, id])
+}
