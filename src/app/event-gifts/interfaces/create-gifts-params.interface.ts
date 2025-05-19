@@ -8,5 +8,5 @@ export interface Gift {
 
 export interface CreateGiftsParams {
   eventId: string;
-  gifts: Gift[]; // Масив подарунків
+  gifts: Gift[];
 }

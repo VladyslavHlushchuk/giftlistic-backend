@@ -3,9 +3,19 @@ export interface EventWithGifts {
   name: string;
   type: string;
   date: Date;
-  gifts?: {
+  host?: {
     id: string;
     name: string;
-    giftGiver: string | null;
+  };
+  gifts: {
+    id: string;
+    name: string;
+    purchaseLink: string | null;
+    imageUrl: string | null;
+    description: string | null;
+    price: number | null;
+    selected: boolean;
+    giftGiverId: string | null;
+    giftGiver: { name: string } | null;
   }[];
 }

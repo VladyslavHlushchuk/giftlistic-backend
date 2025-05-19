@@ -7,8 +7,9 @@ import { IsNotEmpty, IsUUID } from 'class-validator';
 export class SelectGiftRequestDTO {
   @ApiProperty({
     type: String,
+    format: 'uuid',
     description: 'Унікальний ідентифікатор подарунку',
-    example: '524756c3-a956-4cb5-828d-71f3409e5f3d',
+    example: 'a0f70813-849e-48f5-9f76-5b0c5b99429d',
     required: true,
   })
   @IsUUID()
@@ -17,8 +18,9 @@ export class SelectGiftRequestDTO {
 
   @ApiProperty({
     type: String,
-    description: 'Унікальний ідентифікатор дарувальника',
-    example: '524756c3-a956-4cb5-828d-71f3409e5f3d',
+    format: 'uuid',
+    description: 'Унікальний ідентифікатор користувача, який обирає подарунок',
+    example: 'd1c1ee7c-83c2-4d17-9ec2-96fbb734d578',
     required: true,
   })
   @IsUUID()

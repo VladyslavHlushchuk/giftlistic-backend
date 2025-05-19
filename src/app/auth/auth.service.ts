@@ -11,7 +11,7 @@ import * as jwt from 'jsonwebtoken';
 import { UsersService } from '../users/users.service';
 import { EmailAlreadyRegisteredException } from 'src/common/errors';
 import { LoginUserParams } from './interfaces';
-import { RegisterDto } from './dtos';
+import { LoginUserResponseDTO, RegisterDto } from './dtos';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RecaptchaService } from './recaptcha/recaptcha.service';
 
@@ -22,12 +22,10 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly recaptchaService: RecaptchaService, // Інжектуємо RecaptchaService
+    private readonly recaptchaService: RecaptchaService,
   ) {}
 
-  // 🟢 Реєстрація нового користувача з перевіркою reCAPTCHA
   async register(dto: RegisterDto & { recaptchaToken: string }) {
-    // Перевірка reCAPTCHA
     await this.recaptchaService.verify(dto.recaptchaToken);
 
     const { name, email, password } = dto;
@@ -56,9 +54,7 @@ export class AuthService {
     };
   }
 
-  // 🟢 Логін користувача з перевіркою reCAPTCHA
   async login(dto: LoginUserParams & { recaptchaToken: string }) {
-    // Перевірка reCAPTCHA
     await this.recaptchaService.verify(dto.recaptchaToken);
 
     const user = await this.usersService.findByEmail(dto.email);
@@ -71,20 +67,12 @@ export class AuthService {
       throw new ForbiddenException('Невірний пароль');
     }
 
-    // Генеруємо нові токени
     const tokens = await this.generateTokens(user.id, user.email);
     await this.updateRefreshToken(user.id, tokens.refresh_token);
 
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token,
-    };
+    return LoginUserResponseDTO.factory(user, tokens);
   }
 
-  // 🟢 Скидання пароля
   async resetPassword(token: string, newPassword: string) {
     let payload: any;
     try {
@@ -108,7 +96,6 @@ export class AuthService {
     return { message: 'Пароль успішно скинуто' };
   }
 
-  // 🟢 Генерація JWT токенів (access та refresh)
   private async generateTokens(
     userId: string,
     email: string,
@@ -132,7 +119,6 @@ export class AuthService {
     return { access_token, refresh_token };
   }
 
-  // 🟢 Оновлення refresh токена у базі
   private async updateRefreshToken(userId: string, refreshToken: string) {
     const hashedRefreshToken = await argon2.hash(refreshToken);
     await this.prisma.user.update({
@@ -141,7 +127,6 @@ export class AuthService {
     });
   }
 
-  //  Оновлення `access_token` за допомогою `refresh_token`
   async refreshTokens(userId: string, refreshToken: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user || !user.refreshToken)
@@ -150,10 +135,8 @@ export class AuthService {
     const isMatch = await argon2.verify(user.refreshToken, refreshToken);
     if (!isMatch) throw new ForbiddenException('Невірний Refresh Token');
 
-    // Генеруємо новий `access_token` та `refresh_token`
     const tokens = await this.generateTokens(user.id, user.email);
 
-    // Оновлюємо `refreshToken` в базі
     await this.updateRefreshToken(user.id, tokens.refresh_token);
 
     return {
@@ -162,7 +145,6 @@ export class AuthService {
     };
   }
 
-  // 🟢 Видалення refresh токена при виході
   async logout(userId: string) {
     if (!userId) {
       throw new BadRequestException('User ID is required');
@@ -174,7 +156,6 @@ export class AuthService {
   }
 
   async googleLogin(user: any) {
-    // Генеруємо токени для користувача
     const tokens = await this.generateTokens(user.id, user.email);
     await this.updateRefreshToken(user.id, tokens.refresh_token);
 

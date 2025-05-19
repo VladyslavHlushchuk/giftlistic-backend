@@ -20,7 +20,7 @@ export class CreateEventGiftsRequestDTO {
   })
   @IsUUID()
   @IsNotEmpty()
-  eventId: string; // Зміна на camelCase
+  eventId: string;
 
   @ApiProperty({
     type: Array,
@@ -28,16 +28,16 @@ export class CreateEventGiftsRequestDTO {
     example: [
       {
         name: 'Чохол для iPhone 13 Pro',
-        purchaseLink: 'https://example.com/iphone13pro-case', // Зміна на camelCase
-        imageUrl: 'https://example.com/images/iphone-case.jpg', // Зміна на camelCase
-        description: 'Силіконовий чохол для iPhone 13 Pro (чорний)', // Зміна на camelCase
+        purchaseLink: 'https://example.com/iphone13pro-case',
+        imageUrl: 'https://example.com/images/iphone-case.jpg',
+        description: 'Силіконовий чохол для iPhone 13 Pro (чорний)',
         price: 400,
       },
       {
         name: 'Порт-хаб USB-C',
-        purchaseLink: 'https://example.com/usb-c-hub', // Зміна на camelCase
-        imageUrl: 'https://example.com/images/usb-c-hub.jpg', // Зміна на camelCase
-        description: 'USB-C хаб з 4 портами USB 3.0 для ноутбуків та планшетів', // Зміна на camelCase
+        purchaseLink: 'https://example.com/usb-c-hub',
+        imageUrl: 'https://example.com/images/usb-c-hub.jpg',
+        description: 'USB-C хаб з 4 портами USB 3.0 для ноутбуків та планшетів',
         price: 600,
       },
     ],
@@ -70,7 +70,7 @@ export class GiftDTO {
   })
   @IsString()
   @IsOptional()
-  purchaseLink?: string; // Зміна на camelCase
+  purchaseLink?: string;
 
   @ApiProperty({
     type: String,
@@ -80,7 +80,7 @@ export class GiftDTO {
   })
   @IsString()
   @IsOptional()
-  imageUrl?: string; // Зміна на camelCase
+  imageUrl?: string;
 
   @ApiProperty({
     type: String,

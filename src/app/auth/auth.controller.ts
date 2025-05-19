@@ -19,7 +19,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
-// Розширюємо стандартний Request
 interface AuthenticatedRequest extends Request {
   user?: any;
 }
@@ -66,7 +65,7 @@ export class AuthController {
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth() {
-    // Цей метод не буде викликаний, оскільки Google редіректить користувача
+    // Порожній метод — редірект обробляє NestJS + passport-google-oauth
   }
 
   @Get('google/callback')
@@ -85,10 +84,15 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
     });
 
-    const userData = encodeURIComponent(
-      JSON.stringify({ id: tokens.id, name: tokens.name, email: tokens.email }),
-    );
-    return res.redirect(`http://localhost:3000/dashboard?user=${userData}`);
+    const redirectUrl = new URL('http://localhost:3000/auth/google/callback');
+
+    redirectUrl.searchParams.set('id', tokens.id);
+    redirectUrl.searchParams.set('name', tokens.name);
+    redirectUrl.searchParams.set('email', tokens.email);
+    redirectUrl.searchParams.set('access_token', tokens.access_token);
+    redirectUrl.searchParams.set('refresh_token', tokens.refresh_token);
+
+    return res.redirect(redirectUrl.toString());
   }
 
   @Get('me')

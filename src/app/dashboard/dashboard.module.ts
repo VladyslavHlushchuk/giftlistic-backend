@@ -7,9 +7,9 @@ import { EventsModule } from '../events/events.module';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [UsersModule, EventsModule], // Імпортуємо необхідні модулі
-  controllers: [DashboardController], // Контролери
-  providers: [DashboardService], // Сервіси
-  exports: [DashboardService], // Додаємо експорт, якщо в майбутньому сервіс буде використовуватись в інших модулях
+  imports: [UsersModule, EventsModule],
+  controllers: [DashboardController],
+  providers: [DashboardService],
+  exports: [DashboardService],
 })
 export class DashboardModule {}

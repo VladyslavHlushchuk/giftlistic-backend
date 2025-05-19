@@ -16,6 +16,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: 'http://localhost:4444/auth/google/callback',
       scope: ['email', 'profile'],
+      prompt: 'select_account',
     });
   }
 
@@ -28,18 +29,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const { emails, displayName, name } = profile;
     const email = emails[0].value;
 
-    // Знаходимо користувача за email. Якщо не існує — створюємо нового.
     let user = await this.usersService.findByEmail(email);
     if (!user) {
-      // Тут можна створити користувача з дефолтним або випадковим паролем
-      // Важливо: метод create в UsersService повинен враховувати соц. аккаунти (можна, наприклад, зберігати null або пустий рядок як пароль)
       user = await this.usersService.create({
         name: displayName || `${name.givenName} ${name.familyName}`,
         email: email,
-        password: '', // або згенерувати випадковий рядок
+        password: '',
       });
     }
-    // Додатково можна зберегти фото чи інші дані з профілю
+
     return done(null, user);
   }
 }

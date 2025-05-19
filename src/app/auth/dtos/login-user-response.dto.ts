@@ -8,27 +8,28 @@ export class LoginUserResponseDTO {
   })
   id: string;
 
-  @ApiProperty({
-    type: String,
-    example: 'teste@email.com',
-  })
+  @ApiProperty({ type: String, example: 'tony@starkindustries.com' })
   email: string;
 
-  @ApiProperty({
-    type: String,
-    example: 'Tony Stark',
-  })
+  @ApiProperty({ type: String, example: 'Tony Stark' })
   name: string;
 
-  @ApiProperty({
-    type: String,
-    example: 'jwt-токен-тут',
-  })
+  @ApiProperty({ type: String, example: 'jwt-access-token' })
   access_token: string;
 
-  static factory(user: UserModel, token: string): LoginUserResponseDTO {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { createdAt, deletedAt, password, ...newUser } = user;
-    return { ...newUser, access_token: token };
+  @ApiProperty({ type: String, example: 'jwt-refresh-token' })
+  refresh_token: string;
+
+  static factory(
+    user: UserModel,
+    tokens: { access_token: string; refresh_token: string },
+  ): LoginUserResponseDTO {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+    };
   }
 }

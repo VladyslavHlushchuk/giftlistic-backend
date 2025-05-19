@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Event as EventModel, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/common/services';
-import { EventType } from '../../common/enums/event-type.enum'; // Додаємо Enum типи подій
+import { EventType } from '../../common/enums/event-type.enum';
 
 @Injectable()
 export class EventsRepository {
@@ -10,14 +10,13 @@ export class EventsRepository {
   async create(input: Prisma.EventCreateInput): Promise<EventModel> {
     const { name, type, host } = input;
 
-    // Конвертація рядка у дату, якщо необхідно
     const date =
       typeof input.date === 'string' ? new Date(input.date) : input.date;
 
     return await this.prismaService.event.create({
       data: {
         name,
-        type: type as EventType, // Використання Enum
+        type: type as EventType,
         date,
         host: {
           connect: { id: host.connect.id },
@@ -29,6 +28,20 @@ export class EventsRepository {
   async findMany(where: Prisma.EventWhereInput): Promise<EventModel[]> {
     return await this.prismaService.event.findMany({
       where,
+    });
+  }
+
+  async findByIdWithHost(eventId: string) {
+    return await this.prismaService.event.findUnique({
+      where: { id: eventId },
+      include: {
+        host: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
   }
 
@@ -53,6 +66,20 @@ export class EventsRepository {
   async delete(eventId: string): Promise<EventModel> {
     return await this.prismaService.event.delete({
       where: { id: eventId },
+    });
+  }
+
+  async findManyWithHost(where: Prisma.EventWhereInput) {
+    return await this.prismaService.event.findMany({
+      where,
+      include: {
+        host: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
   }
 }

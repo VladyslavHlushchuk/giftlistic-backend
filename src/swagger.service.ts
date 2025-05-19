@@ -5,7 +5,6 @@ export const enableSwagger = (
   app: INestApplication,
   documentationPath = 'api',
 ): void => {
-  // Swagger буде активовано лише в non-production середовищі
   const isProd = process.env.NODE_ENV === 'production';
   if (isProd) {
     console.log('Swagger документація вимкнена в production режимі.');
@@ -25,11 +24,9 @@ export const enableSwagger = (
         scheme: 'bearer',
         bearerFormat: 'JWT',
       },
-      'JWT-auth', // ім'я схеми авторизації
+      'access-token',
     )
     .addServer(`http://localhost:${port}/`, 'Local')
-    // За потреби додай інші сервери, наприклад:
-    // .addServer('https://api.yourdomain.com', 'Production')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

@@ -16,44 +16,56 @@ export class EventsService {
   /**
    * Створює подію, прив'язану до користувача.
    */
-  async create(param: CreateEventParams) {
+  async create(param: CreateEventParams): Promise<EventWithGifts> {
     const user = await this.userService.getById(param.hostId);
     if (!user) {
       throw new NotFoundException('Користувач-організатор не знайдений!');
     }
 
-    return await this.repository.create({
+    const created = await this.repository.create({
       ...param,
-      type: param.type as EventType, // Використання Enum
+      type: param.type as EventType,
       host: {
         connect: {
           id: user.id,
         },
       },
     });
+
+    return await this.getEventByIdOrThrowError(created.id);
   }
 
   /**
    * Отримати всі події.
    */
   async getAllEvents(): Promise<EventWithGifts[]> {
-    return await this.repository.findMany({});
+    const events = await this.repository.findManyWithHost({});
+
+    return events.map((event) => ({
+      ...event,
+      gifts: [],
+    }));
   }
 
   /**
    * Отримати всі події, створені користувачем.
    */
-  async getEventByUserID(userID: string) {
-    return await this.repository.findMany({
+  async getEventByUserID(userID: string): Promise<EventWithGifts[]> {
+    const events = await this.repository.findManyWithHost({
       hostId: userID,
     });
+
+    return events.map((event) => ({
+      ...event,
+      gifts: [],
+    }));
   }
 
   /**
    * Отримати подію разом з її подарунками.
    */
   async getEventAndGiftsByID(eventID: string): Promise<EventWithGifts> {
-    const { id, name, type, date } =
+    const { id, name, type, date, host } =
       await this.getEventByIdOrThrowError(eventID);
 
     const eventGifts = await this.eventGiftService.findManyByEventID(eventID);
@@ -61,12 +73,13 @@ export class EventsService {
     const formattedGifts = eventGifts.map((gift) => ({
       id: gift.id,
       name: gift.name,
-      purchaseLink: gift.purchaseLink,
-      imageUrl: gift.imageUrl,
-      description: gift.description,
-      price: gift.price,
-      selected: gift.selected,
-      giftGiver: gift.giftGiver?.name || null,
+      purchaseLink: gift.purchaseLink ?? null,
+      imageUrl: gift.imageUrl ?? null,
+      description: gift.description ?? null,
+      price: gift.price ?? null,
+      selected: gift.selected ?? false,
+      giftGiverId: gift.giftGiverId ?? null,
+      giftGiver: gift.giftGiver ? { name: gift.giftGiver.name } : null,
     }));
 
     return {
@@ -74,6 +87,7 @@ export class EventsService {
       name,
       type,
       date,
+      host: host ? { id: host.id, name: host.name } : null,
       gifts: formattedGifts,
     };
   }
@@ -99,39 +113,43 @@ export class EventsService {
   /**
    * Отримати подію за ID або кинути помилку, якщо її не знайдено.
    */
-  async getEventByIdOrThrowError(eventID: string) {
-    if (!eventID)
+  async getEventByIdOrThrowError(eventID: string): Promise<EventWithGifts> {
+    if (!eventID) {
       throw new NotFoundException('Некоректний ідентифікатор події.');
+    }
 
-    const event = await this.repository.findFirst(eventID);
+    const event = await this.repository.findByIdWithHost(eventID);
 
     if (!event) {
       throw new NotFoundException('Подія не знайдена!');
     }
 
-    return event;
+    return {
+      ...event,
+      gifts: [],
+    };
   }
 
   /**
    * Оновити дані події за ID.
    */
-  async updateEvent(eventID: string, updateData: Partial<CreateEventParams>) {
-    // Переконайтеся, що подія існує
+  async updateEvent(
+    eventID: string,
+    updateData: Partial<CreateEventParams>,
+  ): Promise<EventWithGifts> {
     await this.getEventByIdOrThrowError(eventID);
 
-    // Можна додати додаткову логіку валідації чи авторизації
+    await this.repository.update(eventID, updateData);
 
-    return await this.repository.update(eventID, updateData);
+    return await this.getEventByIdOrThrowError(eventID);
   }
 
   /**
    * Видалити подію за ID.
    */
-  async deleteEvent(eventID: string) {
-    // Перевірка, чи існує подія
-    await this.getEventByIdOrThrowError(eventID);
-
-    // Видалення події
-    return await this.repository.delete(eventID);
+  async deleteEvent(eventID: string): Promise<EventWithGifts> {
+    const event = await this.getEventByIdOrThrowError(eventID);
+    await this.repository.delete(eventID);
+    return event;
   }
 }

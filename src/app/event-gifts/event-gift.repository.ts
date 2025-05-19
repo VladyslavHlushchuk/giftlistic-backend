@@ -64,19 +64,30 @@ export class EventGiftRepository {
     giftID: string,
     updateParams: Prisma.EventGiftUpdateInput,
   ): Promise<EventGiftModel> {
-    // Перевіряємо, чи існує подарунок
     const existingGift = await this.prismaService.eventGift.findFirst({
-      where: { id: giftID }, // Використовуємо правильний тип
+      where: { id: giftID },
     });
 
     if (!existingGift) {
       throw new NotFoundException('Подарунок не знайдено!');
     }
 
-    // Оновлюємо подарунок
     return await this.prismaService.eventGift.update({
       where: { id: giftID },
-      data: updateParams, // Передаємо дані для оновлення
+      data: updateParams,
+    });
+  }
+
+  async findByIdWithGiftGiver(giftId: string) {
+    return this.prismaService.eventGift.findUnique({
+      where: { id: giftId },
+      include: {
+        giftGiver: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
   }
 }

@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiResponse,
@@ -27,9 +28,11 @@ import { SelectGiftRequestDTO } from './dtos/select-gift-request.dto ';
 import { EventGiftService } from './event-gift.service';
 import { CreateGiftParams } from './interfaces';
 import { CreateEventGiftsRequestDTO } from './dtos/create-event-gifts-request.dto';
+import { GiftResponseDTO } from './dtos/gift-response.dto';
 
 @ApiTags('Gifts')
 @ApiBadRequestResponse({ type: BadRequestDTO })
+@ApiBearerAuth('access-token')
 @Controller('event-gift')
 export class EventGiftController {
   constructor(private readonly eventGiftService: EventGiftService) {}
@@ -73,7 +76,7 @@ export class EventGiftController {
   @ApiCreatedResponse({ type: GetEventGiftsResponseDTO })
   @Post('many')
   async createMany(@Body() params: CreateEventGiftsRequestDTO) {
-    const { eventId, gifts } = params; // Використовуємо eventId замість eventid
+    const { eventId, gifts } = params;
 
     if (!gifts || gifts.length === 0) {
       throw new BadRequestException('Список подарунків не може бути порожнім.');
@@ -99,7 +102,7 @@ export class EventGiftController {
   async findEventGifts(@Param('eventId') eventId: string) {
     try {
       const eventGifts = await this.eventGiftService.findManyByEventID(eventId);
-      return GetEventGiftsResponseDTO.factory(eventGifts);
+      return { data: GetEventGiftsResponseDTO.factory(eventGifts) };
     } catch (err) {
       throw new BadRequestException(err?.message);
     }
@@ -118,6 +121,27 @@ export class EventGiftController {
     }
   }
 
+  @ApiOkResponse({ type: GiftResponseDTO })
+  @Get('gift/:giftId')
+  async getGift(@Param('giftId') giftId: string) {
+    try {
+      const eventGift =
+        await this.eventGiftService.findByIdWithGiftGiver(giftId);
+
+      return {
+        data: GiftResponseDTO.fromEntity(eventGift),
+      };
+    } catch (err) {
+      throw new BadRequestException(err?.message);
+    }
+  }
+
+  @Post('/unselect')
+  async unselectGift(@Body() dto: SelectGiftRequestDTO) {
+    const { giftId, giftGiverId } = dto;
+    return await this.eventGiftService.unselectGift(giftId, giftGiverId);
+  }
+
   /**
    * Вибір подарунку користувачем.
    */
@@ -126,7 +150,6 @@ export class EventGiftController {
   async selectGift(@Body() selectGiftDto: SelectGiftRequestDTO) {
     const { giftId, giftGiverId } = selectGiftDto;
 
-    // Логіка для вибору подарунка
     return await this.eventGiftService.selectGift({
       giftID: giftId,
       giftGiverId: giftGiverId,

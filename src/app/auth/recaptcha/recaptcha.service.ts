@@ -13,7 +13,6 @@ export class RecaptchaService {
   ) {}
 
   async verify(token: string): Promise<boolean> {
-    // Для розробки або тестування, якщо токен співпадає з dummyTokenForDev, повертаємо true
     if (
       process.env.NODE_ENV === 'development' ||
       token === 'dummyTokenForDev'

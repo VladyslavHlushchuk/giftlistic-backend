@@ -1,5 +1,10 @@
 import { BadRequestException, Controller, Get, Param } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { BadRequestDTO } from 'src/common/dtos';
 import { DashboardService } from './dashboard.service';
@@ -7,14 +12,14 @@ import { GetDashboardResponseDTO } from './dtos';
 
 @ApiTags('Dashboard')
 @ApiBadRequestResponse({ type: BadRequestDTO })
+@ApiBearerAuth('access-token')
 @Controller('dashboard')
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   /**
-   * Отримати інформацію для дашборду за ідентифікатором користувача.
-   * @param user_id Ідентифікатор користувача
-   * @returns Дані дашборду користувача
+   * @param
+   * @returns
    */
   @ApiOkResponse({ type: GetDashboardResponseDTO })
   @Get(':user_id')

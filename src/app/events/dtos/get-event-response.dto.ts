@@ -1,46 +1,47 @@
 import { ApiProperty } from '@nestjs/swagger';
-
-import { snakeKeys } from 'src/common/utils';
-import type { EventWithGifts } from '../interfaces';
+import { GiftResponseDTO } from '../../event-gifts/dtos/gift-response.dto';
+import type { EventWithGifts } from '../interfaces/event-with-gifts.interface';
 
 export class GetEventResponseDTO {
-  @ApiProperty({
-    example: '0c0c3bf7-28a0-4fad-afc7-72cb2f8c0005',
-  })
+  @ApiProperty()
   id: string;
 
-  @ApiProperty({
-    example: 'Baby Shower',
-  })
+  @ApiProperty()
   name: string;
 
-  @ApiProperty({
-    example: 'BABY_SHOWER',
-  })
+  @ApiProperty()
   type: string;
 
-  @ApiProperty({
-    example: '2024-03-22T00:00:00.000Z',
-  })
+  @ApiProperty()
   date: string;
 
-  @ApiProperty({
-    example: [
-      {
-        id: '35375376-d3ce-49c1-9bd1-c9cf7cb5514c',
-        name: 'Чохол для iPhone 13 Pro',
-        gift_giver: 'Олександр',
-      },
-      {
-        id: 'a7d4e37f-9c52-44d6-9e2c-7d3a4a87a915',
-        name: 'Порт-хаб USB-C',
-        gift_giver: null,
-      },
-    ],
-  })
-  gifts: Record<string, string | null>[];
+  @ApiProperty({ type: [GiftResponseDTO] })
+  gifts: GiftResponseDTO[];
 
-  static factory(eventWithGifts: EventWithGifts) {
-    return snakeKeys(eventWithGifts);
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    example: { id: 'user-id', name: 'Організатор' },
+  })
+  host?: { id: string; name: string } | null;
+
+  static factory(event: EventWithGifts): GetEventResponseDTO {
+    return {
+      id: event.id,
+      name: event.name,
+      type: event.type,
+      date: event.date.toISOString(),
+      gifts: event.gifts.map((gift) => ({
+        id: gift.id,
+        name: gift.name,
+        purchaseLink: gift.purchaseLink ?? null,
+        imageUrl: gift.imageUrl ?? null,
+        description: gift.description ?? null,
+        price: gift.price ?? null,
+        selected: gift.selected ?? false,
+        giftGiver: gift.giftGiver?.name ?? null,
+      })),
+      host: event.host ? { id: event.host.id, name: event.host.name } : null,
+    };
   }
 }

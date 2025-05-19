@@ -19,6 +19,10 @@ export class EventGiftService {
     private readonly eventRepository: EventsRepository,
   ) {}
 
+  async findOne(giftId: string) {
+    return this.getEventGiftOrThrowError(giftId);
+  }
+
   async create({
     eventId,
     name,
@@ -27,7 +31,6 @@ export class EventGiftService {
     description,
     price,
   }: CreateGiftParams) {
-    // Перевіряємо, чи існує подія
     const event = await this.eventRepository.findFirst(eventId);
 
     if (!event) {
@@ -79,13 +82,23 @@ export class EventGiftService {
       throw new BadRequestException('Подарунок вже хтось вибрав!');
     }
 
-    // Оновлюємо подарунок, передаючи giftGiver замість giftGiverId
-    return await this.eventGiftRepository.update(
-      giftID, // передаємо giftID без обгортки
-      {
-        giftGiver: { connect: { id: giftGiverId } }, // використовуємо connect для зв'язку з giftGiver
-      },
-    );
+    return await this.eventGiftRepository.update(giftID, {
+      selected: true,
+      giftGiver: { connect: { id: giftGiverId } },
+    });
+  }
+
+  async unselectGift(giftID: string, giftGiverId: string) {
+    const gift = await this.getEventGiftOrThrowError(giftID);
+
+    if (!gift.selected || gift.giftGiverId !== giftGiverId) {
+      throw new BadRequestException('Ви не можете скасувати цей подарунок.');
+    }
+
+    return await this.eventGiftRepository.update(giftID, {
+      selected: false,
+      giftGiver: { disconnect: true },
+    });
   }
 
   async getEventGiftOrThrowError(giftID: string) {
@@ -97,10 +110,12 @@ export class EventGiftService {
   }
 
   async updateGift(giftID: string, updateData: CreateGiftParams) {
-    // Перевірка на наявність подарунка
     await this.getEventGiftOrThrowError(giftID);
 
-    // Оновлюємо подарунок
     return await this.eventGiftRepository.update(giftID, updateData); // використовуємо правильну конструкцію
+  }
+
+  async findByIdWithGiftGiver(giftId: string) {
+    return this.eventGiftRepository.findByIdWithGiftGiver(giftId);
   }
 }

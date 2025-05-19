@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Event as EventModel } from '@prisma/client';
 
 export class CreateEventResponseDTO {
   @ApiProperty({
@@ -30,12 +29,33 @@ export class CreateEventResponseDTO {
   })
   date: Date;
 
-  static factory(event: EventModel) {
+  @ApiProperty({
+    description: 'Організатор події',
+    required: false,
+    nullable: true,
+    example: {
+      id: '524756c3-a956-4cb5-828d-71f3409e5f3d',
+      name: 'Оксана',
+    },
+  })
+  host?: { id: string; name: string } | null;
+
+  @ApiProperty({
+    type: [Object],
+    required: false,
+    description: 'Список подарунків до події (може бути порожній)',
+    default: [],
+  })
+  gifts?: any[];
+
+  static factory(event: any): CreateEventResponseDTO {
     return {
       id: event.id,
       name: event.name,
       type: event.type,
       date: event.date,
+      host: event.host ? { id: event.host.id, name: event.host.name } : null,
+      gifts: event.gifts ?? [],
     };
   }
 }

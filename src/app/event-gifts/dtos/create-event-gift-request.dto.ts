@@ -21,7 +21,7 @@ export class CreateEventGiftRequestDTO {
   })
   @IsUUID()
   @IsNotEmpty()
-  eventId: string; // Заміна на camelCase
+  eventId: string;
 
   @ApiProperty({
     type: String,
@@ -42,7 +42,7 @@ export class CreateEventGiftRequestDTO {
   })
   @IsUrl()
   @IsOptional()
-  purchaseLink?: string; // Заміна на camelCase
+  purchaseLink?: string;
 
   @ApiProperty({
     type: String,
@@ -52,7 +52,7 @@ export class CreateEventGiftRequestDTO {
   })
   @IsUrl()
   @IsOptional()
-  imageUrl?: string; // Заміна на camelCase
+  imageUrl?: string;
 
   @ApiProperty({
     type: String,

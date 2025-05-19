@@ -7,6 +7,7 @@ import { UsersModule } from './app/users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ForgotPasswordModule } from './app/auth/forgot-password/forgot-password.module';
 import { AuthModule } from './app/auth/auth.module';
+import { GuestController } from './app/guest/guest.controller';
 
 @Module({
   imports: [
@@ -18,5 +19,6 @@ import { AuthModule } from './app/auth/auth.module';
     ForgotPasswordModule,
     AuthModule,
   ],
+  controllers: [GuestController],
 })
 export class AppModule {}
