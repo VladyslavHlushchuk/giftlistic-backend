@@ -144,4 +144,4 @@ Bachelor’s degree project in Software Engineering, 2025
 ## 📌 License
 
 This project is licensed under the MIT License. Free to use under the terms of the license.
->>>>>>> e01d653 (Add unit tests for AuthService, UserService, EventGiftService)
+
